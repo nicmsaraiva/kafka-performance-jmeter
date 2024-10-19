@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Plano de Teste">
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="Variáveis Definidas Pelo Usuário">
+        <collectionProp name="Arguments.arguments"/>
+      </elementProp>
+    </TestPlan>
+    <hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Kafka Load Testing">
+        <intProp name="ThreadGroup.num_threads">1</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Controlador de Iteração">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="JSR223 Sampler">
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="script">import org.apache.kafka.clients.producer.KafkaProducer
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.clients.producer.RecordMetadata
+import org.apache.kafka.common.serialization.StringSerializer
+import java.util.UUID
+
+// Configurações do Kafka
+def props = new Properties()
+props.put(&quot;bootstrap.servers&quot;, &quot;localhost:9092&quot;) // Kafka local
+props.put(&quot;key.serializer&quot;, StringSerializer.class.getName())
+props.put(&quot;value.serializer&quot;, StringSerializer.class.getName())
+props.put(&quot;acks&quot;, &quot;all&quot;)
+props.put(&quot;retries&quot;, 0)
+
+// Criando o produtor Kafka
+KafkaProducer&lt;String, String&gt; producer = new KafkaProducer&lt;&gt;(props)
+
+try {
+    // Gerando um UUID aleatório
+    String uuid = UUID.randomUUID().toString()
+
+    // Criando a mensagem
+    String topic = &quot;test-topic&quot;
+    String key = &quot;key1&quot;
+    String value = &quot;Mensagem com UUID aleatório: &quot; + uuid
+
+    // Enviando a mensagem para o Kafka
+    ProducerRecord&lt;String, String&gt; record = new ProducerRecord&lt;&gt;(topic, key, value)
+    RecordMetadata metadata = producer.send(record).get()
+
+    // Log para verificar envio
+    log.info(&quot;Mensagem enviada para o tópico ${topic} com UUID: ${uuid}, partição: ${metadata.partition()}, offset: ${metadata.offset()}&quot;)
+
+    // Resultado no relatório JMeter
+    SampleResult.setResponseData(&quot;Mensagem com UUID enviada com sucesso: ${uuid}&quot;, &quot;UTF-8&quot;)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    log.error(&quot;Erro ao enviar mensagem para Kafka: ${e.message}&quot;, e)
+    SampleResult.setResponseData(&quot;Erro ao enviar mensagem para Kafka: ${e.message}&quot;, &quot;UTF-8&quot;)
+    SampleResult.setSuccessful(false)
+} finally {
+    producer.close()
+}
+</stringProp>
+          <stringProp name="scriptLanguage">groovy</stringProp>
+        </JSR223Sampler>
+        <hashTree/>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="Ver Árvore de Resultados">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

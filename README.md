@@ -1,4 +1,19 @@
-# Comandos execução Local
+##  Testes Perfomance JMeter e Kafka
+
+### Download Plugin KafkaMeter
+#### https://jmeter-plugins.org/ 
+#### Procurar por KafkaMeter, selecionar opção DI-KafkaMeter
+
+![alt text](<site plugin.png>)
+
+### Instalar plugin no diretório do JMeter
+![alt text](plugins.png)
+
+### Utilizar componentes do Kafka (Consumer e Producer)
+![alt text](image.png)
+
+
+## Comandos execução Local
 
 ### Subir docker
 ````sh
